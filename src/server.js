@@ -27,6 +27,6 @@ const resolvers = {
 	},
 };
 
-const server = new GraphQLServer({ typeDefs: 'types.graphql', resolvers });
+const server = new GraphQLServer({ typeDefs: './dist/schema.graphql', resolvers });
 server.start({port, defaultPlaygroundQuery})
 	.then(() => console.log(`Server is running on http://127.0.0.1:${port}/`));
