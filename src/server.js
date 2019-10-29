@@ -17,14 +17,12 @@ const defaultPlaygroundQuery =
 const resolvers = {
 	Query: {
 		app: async (_, { appId }) => {
-			const app = await gplay.app({appId});
-			return {
-				appId: app['appId'],
-				title: app['title'],
-				description: app['description'],
-			}
+			return await gplay.app({appId});
 		},
 	},
+	App: {
+		histogram: (parent) => [1, 2, 3, 4, 5].map(stars => parent.histogram[String(stars)] || 0)
+	}
 };
 
 const server = new GraphQLServer({ typeDefs: './dist/schema.graphql', resolvers });
