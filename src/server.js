@@ -5,19 +5,6 @@ import gplay from 'google-play-scraper';
 
 const port = 4000;
 
-// language=GraphQL
-const typeDefs = `
-	type App {
-		appId: String!,
-		title: String!,
-		description: String!,
-	}
-	
-	type Query {
-		app(appId: String!): App
-	}
-`;
-
 const resolvers = {
 	Query: {
 		app: async (_, { appId }) => {
@@ -31,5 +18,5 @@ const resolvers = {
 	},
 };
 
-const server = new GraphQLServer({ typeDefs, resolvers });
+const server = new GraphQLServer({ typeDefs: 'types.graphql', resolvers });
 server.start({port}).then(() => console.log(`Server is running on http://127.0.0.1:${port}/`));
