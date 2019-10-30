@@ -25,7 +25,6 @@ const appHandler = {
 		} else if (appFields.includes(key)) { // load field
 			if (!target.hasOwnProperty('_request')) {
 				// start request
-				console.log('Request app details', target.appId);
 				target._request = gplay.app({appId: target.appId}).then((appData) => {
 					Object.assign(target, appData);
 				});
@@ -36,11 +35,9 @@ const appHandler = {
 		}
 	},
 	has: (target, key) => {
-		console.log('ah', target.appId, 'has', key);
 		return key in target || key in appFields;
 	},
 	ownKeys: (target) => {
-		console.log('ah', target.appId, 'ownKeys');
 		return Array.from(new Set([
 			...appFields,
 			...(Reflect.ownKeys(target) || []),
@@ -80,44 +77,6 @@ const appResolverHandler = {
 				enumerable: true,
 			}
 		}
-	},
-
-
-	getPrototypeOf: (target) => {
-		console.log('getPrototypeOf');
-		return Object.getPrototypeOf(target);
-	},
-	setPrototypeOf: (target) => {
-		console.log('setPrototypeOf');
-		return Object.setPrototypeOf(target);
-	},
-	isExtensible: (target) => {
-		console.log('isExtensible');
-		return Object.isExtensible(target);
-	},
-	preventExtensions: (target) => {
-		console.log('preventExtensions');
-		return Object.preventExtensions(target);
-	},
-	defineProperty: (target, k, a) => {
-		console.log('defineProperty', k, a);
-		return Object.defineProperty(target, k, a);
-	},
-	set: (target, k, v) => {
-		console.log('set', k, v);
-		target[k] = v;
-	},
-	deleteProperty: (target, k) => {
-		console.log('deleteProperty', k);
-		delete target[k];
-	},
-	apply: (target, ...args) => {
-		console.log('apply', ...args);
-		return target(...args);
-	},
-	construct: (target, ...args) => {
-		console.log('construct', ...args);
-		return new target(...args);
 	},
 };
 
