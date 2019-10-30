@@ -3,6 +3,7 @@ import {buildSchema} from 'graphql';
 import { GraphQLServer } from "graphql-yoga";
 import gplay, { category, collection, sort, age, permission } from 'google-play-scraper';
 import {importSchema} from "graphql-import";
+import {lazy} from "./lazy";
 
 const port = 4000;
 
@@ -18,42 +19,15 @@ const defaultPlaygroundQuery =
 }
 `;
 
-const appHandler = {
-	get: async (target, key) => {
-		if (key in target) { // field already loaded
-			return target[key];
-		} else if (appFields.includes(key)) { // load field
-			if (!target.hasOwnProperty('_request')) {
-				// start request
-				target._request = gplay.app({appId: target.appId}).then((appData) => {
-					Object.assign(target, appData);
-				});
-			}
-
-			await Promise.resolve(target._request);
-			return target[key];
-		}
-	},
-	has: (target, key) => {
-		return key in target || key in appFields;
-	},
-	ownKeys: (target) => {
-		return Array.from(new Set([
-			...appFields,
-			...(Reflect.ownKeys(target) || []),
-		]));
-	},
-};
-
 const appResolverHandler = {
 	get: (target, key) => {
 		return (parent, args, context, info) => {
-			const proxiedParent = new Proxy(parent, appHandler);
+			const lazyParent = lazy(parent, appFields, () => gplay.app({appId: parent.appId}));
 
 			if (key in target) {
-				return target[key](proxiedParent, args, context, info);
+				return target[key](lazyParent, args, context, info);
 			} else {
-				return proxiedParent[key];
+				return lazyParent[key];
 			}
 		};
 	},
