@@ -49,6 +49,11 @@ const resolvers = {
 			const hist = await parent.histogram;
 			return [1, 2, 3, 4, 5].map(stars => hist[String(stars)] || 0)
 		},
+		reviewCount: (parent) => parent.reviews,
+		reviews: async (parent, params, {lang, country}) => {
+			const appId = await parent.appId;
+			return gplay.reviews(mapOpts({...params, appId, lang, country}));
+		}
 	}),
 };
 

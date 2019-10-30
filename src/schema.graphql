@@ -101,7 +101,11 @@ type App {
     score: Float
     scoreText: String!
     ratings: Int!
-    reviews: Int!
+    reviews(
+        sort: Sort = NEWEST,
+        num: Int = 100,
+    ): [Review!]!
+    reviewCount: Int!
     histogram: [Int!]!
     price: Float!
     free: Boolean!
@@ -135,6 +139,27 @@ type App {
     comments: [String!]!
 }
 
+type Review {
+    id: String!
+    userName: String!
+    userImage: String!
+    date: String!
+    score: Int!
+    scoreText: String!
+    url: String!
+    title: String
+    text: String!
+    replyDate: String
+    replyText: String
+    version: String!
+    thumbsUp: Int!
+    criterias: [Criteria!]!
+}
+
+type Criteria {
+    criteria: String!
+    rating: Int
+}
 
 type Query {
     app(
