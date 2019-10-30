@@ -1,7 +1,7 @@
 import "regenerator-runtime/runtime";
 import {buildSchema} from 'graphql';
-import { GraphQLServer } from "graphql-yoga";
-import gplay, { category, collection, sort, age, permission } from 'google-play-scraper';
+import {GraphQLServer} from "graphql-yoga";
+import gplay, {category, collection, sort, age, permission} from 'google-play-scraper';
 import {importSchema} from "graphql-import";
 import {LazyLoader, withLazyParent} from "./lazy";
 
@@ -9,7 +9,7 @@ const port = 4000;
 
 const typeDefs = importSchema('./dist/schema.graphql');
 const appFields = Object.keys(buildSchema(typeDefs).getType('App').getFields());
-const appLoader = new LazyLoader(appFields, ({appId}) => gplay.app({appId}));
+const appLoader = new LazyLoader(appFields, ({appId}, property, {context: {lang, country}}) => gplay.app({appId, lang, country}));
 
 const defaultPlaygroundQuery =
 `{
@@ -22,7 +22,7 @@ const defaultPlaygroundQuery =
 
 
 const mapOpts = (opts) => {
-	return Object.entries({ category, collection, sort, age, permission })
+	return Object.entries({category, collection, sort, age, permission})
 		.reduce((acc, [name, val_map]) => {
 			if (opts.hasOwnProperty(name)) {
 				return {
@@ -37,11 +37,11 @@ const mapOpts = (opts) => {
 
 const resolvers = {
 	Query: {
-		app: async (_, { appId }) => {
-			return await gplay.app({appId});
+		app: async (_, {appId}, {lang, country}) => {
+			return await gplay.app({appId, lang, country});
 		},
-		list: async (_, params) => {
-			return await gplay.list(mapOpts(params));
+		list: async (_, params, {lang, country}) => {
+			return await gplay.list(mapOpts({...params, lang, country}));
 		},
 	},
 	App: withLazyParent(appLoader, {
@@ -52,6 +52,14 @@ const resolvers = {
 	}),
 };
 
-const server = new GraphQLServer({ typeDefs, resolvers });
+const server = new GraphQLServer({
+	typeDefs,
+	resolvers,
+	context: ({request}) => ({
+		lang: request.header('lang') || 'en',
+		country: request.header('country') || 'us',
+	})
+});
+
 server.start({port, defaultPlaygroundQuery})
 	.then(() => console.log(`Server is running on http://127.0.0.1:${port}/`));
