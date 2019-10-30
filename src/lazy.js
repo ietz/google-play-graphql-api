@@ -8,10 +8,9 @@ export class LazyLoader {
 	 * properties as an object.
 	 */
 
-	constructor(properties, keyExtractor, load) {
+	constructor(properties, load) {
 		this.properties = properties;
 		this.load = load;
-		this.keyExtractor = keyExtractor;
 	}
 }
 
@@ -68,25 +67,24 @@ class LazyObjectProxyHandler extends AugmentingProxyHandler {
 	 * will be retrieved as soon as they are requested.
 	 *
 	 * @param loader LazyLoader describing the object
+	 * @param data Arbitrary object to be passed to loader.load
 	 */
 
-	constructor(loader) {
+	constructor(loader, data) {
 		super(loader.properties);
 		this.loader = loader;
-		this.requests = {};
+		this.data = data;
 	}
 
 	get = async (target, property) => {
 		if (!(property in target) && this.loader.properties.includes(property)) {
-			const targetKey = this.loader.keyExtractor(target);
-
-			if (!(target in this.requests)) {
-				this.requests[targetKey] = Promise.resolve(this.loader.load(targetKey, property)).then((data) => {
+			if (!('_request' in target)) {
+				target._request = Promise.resolve(this.loader.load(target, property, this.data)).then((data) => {
 					Object.assign(target, data);
 				});
 			}
 
-			await this.requests[targetKey];
+			await target._request;
 		}
 
 		return target[property];
@@ -97,12 +95,12 @@ class LazyObjectProxyHandler extends AugmentingProxyHandler {
 class LazyParentResolverProxyHandler extends AugmentingProxyHandler {
 	constructor(loader) {
 		super(loader.properties);
-		this.lazyParentProxyHandler = new LazyObjectProxyHandler(loader);
+		this.loader = loader;
 	};
 
 	get = (target, property) => {
 		return (parent, args, context, info) => {
-			const lazyParent = new Proxy(parent, this.lazyParentProxyHandler);
+			const lazyParent = new Proxy(parent, new LazyObjectProxyHandler(this.loader, {args, context, info}));
 
 			if (property in target) {
 				return target[property](lazyParent, args, context, info);
@@ -112,4 +110,3 @@ class LazyParentResolverProxyHandler extends AugmentingProxyHandler {
 		};
 	};
 }
-

@@ -9,11 +9,7 @@ const port = 4000;
 
 const typeDefs = importSchema('./dist/schema.graphql');
 const appFields = Object.keys(buildSchema(typeDefs).getType('App').getFields());
-const appLoader = new LazyLoader(
-	appFields,
-	app => app.appId,
-	id => gplay.app({appId: id})
-);
+const appLoader = new LazyLoader(appFields, ({appId}) => gplay.app({appId}));
 
 const defaultPlaygroundQuery =
 `{
