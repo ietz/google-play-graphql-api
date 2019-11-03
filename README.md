@@ -1,7 +1,11 @@
 # GraphQL API for the Google Play App Store
-## Usage with Docker
-Build and run the docker image using
+## Usage
+Simply start the service using the [ietz/google-play-graphql-api](https://hub.docker.com/r/ietz/google-play-graphql-api) docker image;
 ```bash
-docker build -t ietz/google-play-graphql-api .
-docker run -p 4000:4000 ietz/google-play-graphql-api
+docker run --rm -p 4000:4000 ietz/google-play-graphql-api
+```
+
+## Locally building docker image
+```bash
+docker build -t google-play-graphql-api .
 ```
