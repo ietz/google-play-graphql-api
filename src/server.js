@@ -15,6 +15,11 @@ const defaultPlaygroundQuery =
 `{
   app(appId: "com.whatsapp") {
     title
+    reviews(num: 3, sort: HELPFULNESS) {
+      userName
+      score
+      text
+    }
     description
   }
 }
