@@ -57,7 +57,8 @@ const resolvers = {
 		reviewCount: (parent) => parent.reviews,
 		reviews: async (parent, params, {lang, country}) => {
 			const appId = await parent.appId;
-			return gplay.reviews(mapOpts({...params, appId, lang, country}));
+			return gplay.reviews(mapOpts({...params, appId, lang, country}))
+				.then(response => response['data']);
 		}
 	}),
 };
